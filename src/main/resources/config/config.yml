@@ -1,0 +1,4 @@
+kiolk-detekt-rules:
+  active: true
+  UseInvokeForOperator:
+    active: true
