@@ -4,10 +4,26 @@ plugins {
 }
 
 group = "com.github.kiolk.detektrules"
-version = "1.0-SNAPSHOT"
+version = "1.0.2"
 
 repositories {
     mavenCentral()
+    mavenLocal()
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            groupId = "com.github.kiolk.detektrules"
+            artifactId = "KiolkDetektRules"
+            version = "1.0.2"
+
+            from(components["java"])
+        }
+    }
+    repositories {
+        mavenLocal()
+    }
 }
 
 dependencies {
