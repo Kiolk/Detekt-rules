@@ -1,8 +1,6 @@
 plugins {
     kotlin("jvm") version "1.9.22"
-    apply {
-        `maven-publish`
-    }
+    apply { `maven-publish` }
 }
 
 group = "com.github.kiolk.detektrules"
