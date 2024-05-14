@@ -1,18 +1,8 @@
-name: Code checks on Pull Request
-on:
-  push:
-    branches:
-      - 'main'
-      - 'dev'
-  workflow_dispatch:
-  pull_request:
-    branches:
-      - 'master'
-      - 'release/**'
-      - 'dev'
+name: Publish to Maven Central Repository
+on: push
 jobs:
   build:
-    name: Code checks on Pull Request
+    name: Publish to Maven Central Repository
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -30,5 +20,7 @@ jobs:
       - name: Setup gpg private key
         run: |
           echo "${{secrets.GPG_PRIVATE_KEY}}" > maven-secret-key.asc
-      - name: Run unit tests
-        run: ./gradlew test
+      - name: Publish to new Maven Central Repository
+        run: |
+          ./gradlew publishAllPublicationsToCentralPortal
+
