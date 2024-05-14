@@ -18,7 +18,6 @@ import org.jetbrains.kotlin.resolve.scopes.findFirstFunction
 import org.jetbrains.kotlin.types.KotlinType
 import org.jetbrains.kotlin.types.isNullable
 
-//@RequiresTypeResolution
 class UseInvokeForOperator(config: Config) : Rule(config) {
 
     override val issue: Issue
