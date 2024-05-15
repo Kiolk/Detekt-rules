@@ -5,8 +5,9 @@ permissions:
 jobs:
   build:
     name: Create Github Release
-
     runs-on: ubuntu-latest
+    outputs:
+      myOutput: ${{ steps.step1.outputs.myOutput }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -23,6 +24,28 @@ jobs:
       - name: Setup gpg private key
         run: |
           echo "${{secrets.GPG_PRIVATE_KEY}}" > maven-secret-key.asc
-      - uses: ncipollo/release-action@v1
-        with:
-          tag: v1.0.4
+      - name: Generate jar
+        run: |
+          ./gradlew jar
+          echo $versionName
+      - name: Read file and store value in variable
+        run: |
+          MY_VERSION=$(grep '^versionName' gradle.properties | cut -d'=' -f2)
+          echo "Version name from gradle.properties: $MY_VERSION"
+          echo "##[set-output name=versionName]$MY_VERSION"
+        shell: bash
+      - name: Step 1
+        id: step1
+        run: echo "::set-output name=myOutput::Hello from Job 1"
+  #      - uses: ncipollo/release-action@v1
+  #        with:
+  #          tag: ${{ steps.build.outputs.versionName }}
+  #          replacesArtifacts: true
+  #          artifacts: build/libs/detekt-rules.jar
+
+  job2:
+    needs: job1
+    runs-on: ubuntu-latest
+    steps:
+      - name: Step 2
+        run: echo "Output from Job 1 ${{ needs.build.outputs.myOutput }}"
