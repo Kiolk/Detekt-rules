@@ -1,45 +1,39 @@
 name: Create Github Release
-on: push
+on:
+  push:
+    branches:
+      - 'master'
 permissions:
   contents: write
 jobs:
-  build:
-    name: Create Github Release
+  check_version:
+    name: Read release version
     runs-on: ubuntu-latest
     outputs:
-      myOutput: ${{ steps.step1.outputs.myOutput }}
+      versionName: ${{ steps.readVersion.outputs.VERSION_NAME }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
-      - name: Set up JDK 17
-        uses: actions/setup-java@v1
-        with:
-          java-version: 17
+        uses: actions/checkout@v4
       - name: Read file and store value in variable
+        id: readVersion
         run: |
           MY_VERSION=$(grep '^versionName' gradle.properties | cut -d'=' -f2)
           echo "Version name from gradle.properties: $MY_VERSION"
-          echo "##[set-output name=versionName]$MY_VERSION"
+          echo "VERSION_NAME=$MY_VERSION" >> "$GITHUB_OUTPUT"
         shell: bash
-      - name: Step 1
-        id: step1
-        run: echo "::set-output name=myOutput::1.0.4"
-  #      - uses: ncipollo/release-action@v1
-  #        with:
-  #          tag: ${{ steps.build.outputs.versionName }}
-  #          replacesArtifacts: true
-  #          artifacts: build/libs/detekt-rules.jar
 
-  job2:
-    needs: build
+  generate_release:
+    name: Generate Github release
+    needs: check_version
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up JDK 17
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v2
         with:
           java-version: 17
+          distribution: 'zulu'
       - name: Setup variables in local.properties
         run: |
           echo "signing_keyId=${{secrets.SIGNING_KEY_ID}}" > local.properties
@@ -49,14 +43,14 @@ jobs:
       - name: Setup gpg private key
         run: |
           echo "${{secrets.GPG_PRIVATE_KEY}}" > maven-secret-key.asc
-      - name: Step 2
-        run: echo "Output from Job 1 ${{ needs.build.outputs.myOutput }}"
       - name: Generate jar
         run: |
           ./gradlew jar
-          echo $versionName
+          echo ${{ needs.check_version.outputs.versionName }}
       - uses: ncipollo/release-action@v1
         with:
-          tag: ${{ needs.build.outputs.myOutput }}
+          tag: ${{ needs.check_version.outputs.versionName }}
           replacesArtifacts: true
           artifacts: build/libs/detekt-rules.jar
+          skipIfReleaseExists: true
+          generateReleaseNotes: true

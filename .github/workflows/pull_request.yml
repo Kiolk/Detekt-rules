@@ -7,16 +7,17 @@ on:
       - 'release/**'
       - 'dev'
 jobs:
-  build:
+  pull_request_checks:
     name: Code checks on Pull Request
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up JDK 17
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v2
         with:
           java-version: 17
+          distribution: 'zulu'
       - name: Setup variables in local.properties
         run: |
           echo "signing_keyId=${{secrets.SIGNING_KEY_ID}}" > local.properties

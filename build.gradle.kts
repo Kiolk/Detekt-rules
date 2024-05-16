@@ -22,7 +22,6 @@ allprojects {
     apply(plugin = "signing")
 
     val dokkaHtml by tasks.existing(DokkaTask::class)
-
     val dokkaJar by tasks.creating(org.gradle.jvm.tasks.Jar::class) {
         group = JavaBasePlugin.DOCUMENTATION_GROUP
         archiveClassifier.set("javadoc")
