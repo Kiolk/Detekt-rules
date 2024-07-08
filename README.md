@@ -1,5 +1,4 @@
-[![](https://jitpack.io/v/Kiolk/Detekt-rules.svg)](https://jitpack.io/#Kiolk/Detekt-rules) ![Maven Central Version](https://img.shields.io/maven-central/v/io.github.kiolk/kiolk-detekt-rules) ![GitHub Release](https://img.shields.io/github/v/release/kiolk/detekt-rules?color=yellow)
-
+[![](https://jitpack.io/v/Kiolk/Detekt-rules.svg)](https://jitpack.io/#Kiolk/Detekt-rules) ![Maven Central Version](https://img.shields.io/maven-central/v/io.github.kiolk/kiolk-detekt-rules) ![GitHub Release](https://img.shields.io/github/v/release/kiolk/detekt-rules?color=yellow) ![Create Github Release](https://github.com/Kiolk/Detekt-rules/actions/workflows/create_github_release.yml/badge.svg) ![Publish to Maven Central Repository](https://github.com/Kiolk/Detekt-rules/actions/workflows/publish_to_maven_central.yml/badge.svg)
 # kiolk-detekt-rules
 Hello folks. This repository contains my own Detekt rules that born in result my work how developer. I am planning to
 add new rules in the future. You are welcome to contribute!
