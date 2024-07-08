@@ -46,7 +46,6 @@ jobs:
       - name: Generate jar
         run: |
           ./gradlew jar
-          echo ${{ needs.check_version.outputs.versionName }}
       - uses: ncipollo/release-action@v1
         with:
           tag: ${{ needs.check_version.outputs.versionName }}
