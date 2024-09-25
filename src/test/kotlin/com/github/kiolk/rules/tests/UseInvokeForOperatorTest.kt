@@ -72,4 +72,33 @@ class UseInvokeForOperatorTest(private val environment: KotlinCoreEnvironment) {
         assertEquals(1, findings.size)
         assertEquals(UseInvokeForOperator.ISSUE_DESCRIPTION, findings[0].issue.description)
     }
+
+    @Test
+    fun `When invoke call inside of lambda which is last parameter When issue reported`() {
+        val path = compileForTest(Path("src/test/resources/InvokeCallInsideLambdaWhichLastParameter.kt"))
+
+        val findings: List<Finding> = UseInvokeForOperator(TestConfig()).compileAndLintWithContext(environment, path.text)
+
+        assertEquals(1, findings.size)
+        assertEquals(UseInvokeForOperator.ISSUE_DESCRIPTION, findings[0].issue.description)
+    }
+
+    @Test
+    fun `When invoke call inside of lambda which is last parameter of method with safe call When issue reported`() {
+        val path = compileForTest(Path("src/test/resources/SafeInvokeCallInsideLambdaWhichLastParameter.kt"))
+
+        val findings: List<Finding> = UseInvokeForOperator(TestConfig()).compileAndLintWithContext(environment, path.text)
+
+        assertEquals(1, findings.size)
+        assertEquals(UseInvokeForOperator.ISSUE_DESCRIPTION, findings[0].issue.description)
+    }
+
+    @Test
+    fun `When part of function name has invoke word When issue  is not reported`() {
+        val path = compileForTest(Path("src/test/resources/ClassWithPartMethodeNameInvoke.kt"))
+
+        val findings: List<Finding> = UseInvokeForOperator(TestConfig()).compileAndLintWithContext(environment, path.text)
+
+        assertTrue(findings.isEmpty())
+    }
 }

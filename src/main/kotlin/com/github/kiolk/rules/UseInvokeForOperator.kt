@@ -1,23 +1,16 @@
 package com.github.kiolk.rules
 
-import io.gitlab.arturbosch.detekt.api.CodeSmell
-import io.gitlab.arturbosch.detekt.api.Config
-import io.gitlab.arturbosch.detekt.api.Debt
-import io.gitlab.arturbosch.detekt.api.Entity
-import io.gitlab.arturbosch.detekt.api.Issue
-import io.gitlab.arturbosch.detekt.api.Rule
-import io.gitlab.arturbosch.detekt.api.Severity
-import org.jetbrains.kotlin.psi.KtCallExpression
-import org.jetbrains.kotlin.psi.KtDotQualifiedExpression
-import org.jetbrains.kotlin.psi.KtExpression
-import org.jetbrains.kotlin.psi.KtPsiFactory
-import org.jetbrains.kotlin.psi.KtSafeQualifiedExpression
+import io.gitlab.arturbosch.detekt.api.*
+import io.gitlab.arturbosch.detekt.api.internal.RequiresTypeResolution
+import org.jetbrains.kotlin.incremental.components.NoLookupLocation
+import org.jetbrains.kotlin.name.Name
+import org.jetbrains.kotlin.psi.*
 import org.jetbrains.kotlin.psi.psiUtil.astReplace
 import org.jetbrains.kotlin.resolve.calls.util.getType
-import org.jetbrains.kotlin.resolve.scopes.findFirstFunction
 import org.jetbrains.kotlin.types.KotlinType
 import org.jetbrains.kotlin.types.isNullable
 
+@RequiresTypeResolution
 class UseInvokeForOperator(config: Config) : Rule(config) {
 
     override val issue: Issue
@@ -31,7 +24,7 @@ class UseInvokeForOperator(config: Config) : Rule(config) {
     override fun visitDotQualifiedExpression(expression: KtDotQualifiedExpression) {
         super.visitDotQualifiedExpression(expression)
 
-        if (expression.text.contains(Regex("invoke\\(.*\\)"))) {
+        if (expression.isHasInvoke()) {
             val receivedType = expression.receiverExpression.getType(bindingContext)
 
             if (!isHasOperatorInvoke(receivedType)) return
@@ -43,7 +36,13 @@ class UseInvokeForOperator(config: Config) : Rule(config) {
             withAutoCorrect {
                 expression.astReplace(
                     KtPsiFactory.contextual(expression)
-                        .createExpression("${expression.firstChild.text}(${invokeExpression.valueArguments.joinToString(", ") { it.text }})")
+                        .createExpression(
+                            "${expression.firstChild.text}(${
+                                invokeExpression.valueArguments.joinToString(
+                                    ", "
+                                ) { it.text }
+                            })"
+                        )
                 )
             }
         }
@@ -52,7 +51,7 @@ class UseInvokeForOperator(config: Config) : Rule(config) {
     override fun visitSafeQualifiedExpression(expression: KtSafeQualifiedExpression) {
         super.visitSafeQualifiedExpression(expression)
 
-        if (expression.text.contains(Regex("invoke\\(.*\\)")) && isNotNullable(expression.receiverExpression)) {
+        if (expression.isHasInvoke() && isNotNullable(expression.receiverExpression)) {
             val receivedType = expression.receiverExpression.getType(bindingContext)
 
             if (!isHasOperatorInvoke(receivedType)) return
@@ -64,10 +63,22 @@ class UseInvokeForOperator(config: Config) : Rule(config) {
             withAutoCorrect {
                 expression.astReplace(
                     KtPsiFactory.contextual(expression)
-                        .createExpression("${expression.firstChild.text}(${invokeExpression.valueArguments.joinToString(", ") { it.text }})")
+                        .createExpression(
+                            "${expression.firstChild.text}(${
+                                invokeExpression.valueArguments.joinToString(
+                                    ", "
+                                ) { it.text }
+                            })"
+                        )
                 )
             }
         }
+    }
+
+    private fun KtQualifiedExpression.isHasInvoke(): Boolean {
+        val calledExpression = this.selectorExpression?.firstChild ?: return false
+
+        return calledExpression.text.contains(Regex("\\binvoke\\b"))
     }
 
     private fun isNotNullable(receiverExpression: KtExpression): Boolean {
@@ -87,10 +98,14 @@ class UseInvokeForOperator(config: Config) : Rule(config) {
             return false
         }
 
-        return receiverType.memberScope.findFirstFunction("invoke") { true }.isOperator
+        return receiverType.memberScope.getContributedFunctions(
+            Name.identifier("invoke"),
+            NoLookupLocation.FROM_BACKEND
+        ).firstOrNull { true }?.isOperator ?: false
     }
 
     companion object {
-        const val ISSUE_DESCRIPTION = "This rule reports that you should use operator instead using directly call invoke"
+        const val ISSUE_DESCRIPTION =
+            "This rule reports that you should use operator instead using directly call invoke"
     }
 }
