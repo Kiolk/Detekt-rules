@@ -12,7 +12,6 @@ import kotlin.test.assertEquals
 
 abstract class AutoCorrectTest<T : Rule>(factory: (config: Config) -> T, additionalConfig: List<Pair<String, Any>> = listOf()) {
 
-    private val rule: T = factory(TestConfig("autoCorrect" to false, *additionalConfig.toTypedArray()))
     private val autoCorrectRule: T = factory(TestConfig("autoCorrect" to true, *additionalConfig.toTypedArray()))
 
     fun assertLintAndFormat(
