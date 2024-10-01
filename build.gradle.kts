@@ -7,7 +7,7 @@ plugins {
     apply { `maven-publish` }
     apply { `signing` }
     id("org.jetbrains.dokka") version "1.9.20"
-    id("com.gradleup.nmcp") version "0.0.7"
+    id("com.gradleup.nmcp") version "0.0.9"
 }
 
 repositories {
